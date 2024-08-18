@@ -10,17 +10,19 @@ import java.io.Serializable;
 
 @Data
 @Entity
-@Table(name = "user")
-public class User implements Serializable {
+@Table(name = "users")
+public class Users implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @Id
-    @Column(name = "username")
+    @Column(name = "id")
+    private String id;
+
+    @Column(name = "username", unique = true)
     private String username;
 
     @Column(name = "password")
     private String password;
-
-    @Column(name = "role")
-    private String role;
 
 }

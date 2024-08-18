@@ -1,9 +1,8 @@
-package io.github.qndev.springbasicauth.authentication;
+package io.github.qndev.springbasicauth.service;
 
-import io.github.qndev.springbasicauth.entity.User;
+import io.github.qndev.springbasicauth.authentication.BasicAuthenticationToken;
+import io.github.qndev.springbasicauth.entity.Users;
 import io.github.qndev.springbasicauth.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -18,16 +17,19 @@ import java.util.List;
 @Service
 public class BasicAuthenticationService {
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+
+    public BasicAuthenticationService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 
         String username = authentication.getName();
-        User userDetails = this.userRepository.findByUsername(username);
+        Users userDetails = this.userRepository.findByUsername(username);
 
         if (userDetails == null) {
             throw new BadCredentialsException("Bad request authentication");
@@ -38,15 +40,17 @@ public class BasicAuthenticationService {
             throw new BadCredentialsException("Bad request authentication");
         }
 
-        if (!"ROLE_USER".equals(userDetails.getRole())) {
-            throw new AccessDeniedException("Access denied");
-        }
+        // if (!"ROLE_USER".equals(userDetails.getRole())) {
+        //     throw new AccessDeniedException("Access denied");
+        // }
 
-        SimpleGrantedAuthority role = new SimpleGrantedAuthority(userDetails.getRole());
+        // Set default SYSTEM role to pass the checking in BasicAuthenticationProvider
+        // Will be checked role and permission in RoleBaseAuthorizationManager
+        SimpleGrantedAuthority role = new SimpleGrantedAuthority("SYSTEM");
         List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
         grantedAuthorities.add(role);
 
-        return BasicAuthenticationToken.authenticated(authentication.getPrincipal(),
+        return BasicAuthenticationToken.authenticated(userDetails.getId(),
                 authentication.getCredentials(),
                 grantedAuthorities);
     }

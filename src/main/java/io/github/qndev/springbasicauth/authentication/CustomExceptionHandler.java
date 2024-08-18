@@ -11,6 +11,7 @@ import java.io.IOException;
 
 @Component
 public class CustomExceptionHandler implements ICustomExceptionHandler {
+
     @Override
     public void handleException(HttpServletRequest request, HttpServletResponse response, Exception exception)
             throws IOException {
@@ -26,4 +27,5 @@ public class CustomExceptionHandler implements ICustomExceptionHandler {
 
         response.getWriter().write(BaseResponse.toJson(response.getStatus(), detailMessage, null));
     }
+
 }
